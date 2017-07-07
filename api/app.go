@@ -67,11 +67,10 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/api/users", a.createUser).Methods("POST")
 
 	a.Router.HandleFunc("/api/users/{id}", a.getUser).Methods("GET")
-	a.Router.HandleFunc("/api/users/{id}/score", a.getScore).Methods("GET")
-
 	a.Router.HandleFunc("/api/questions", a.getQuestions).Methods("GET")
 	a.Router.HandleFunc("/api/questions/{id}", a.validateQuestion).Methods("POST")
 
+	a.Router.HandleFunc("/api/scores", a.getTopScores).Methods("GET")
 }
 
 func (a *App) Run(addr string) {
@@ -133,8 +132,19 @@ func (a *App) getUser(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, u)
 }
 
-func (a *App) getScore(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, http.StatusOK, nil)
+func (a *App) getTopScores(w http.ResponseWriter, r *http.Request) {
+	// fishy way, no date validatioon
+	date := r.URL.Query().Get("date")
+
+	cursor, err := rethink.Table("users").Filter(func(row rethink.Term) rethink.Term { return row.Field("scores").Field(date) }).OrderBy(rethink.Desc(func(row rethink.Term) rethink.Term { return row.Field("scores").Field(date) })).Run(a.RethinkSession)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	scores, err := getTopScores(cursor)
+
+	respondWithJSON(w, http.StatusOK, scores)
 }
 
 func (a *App) getQuestions(w http.ResponseWriter, r *http.Request) {
