@@ -9,12 +9,13 @@ import VueResource from 'vue-resource'
 // Load extern library
 import ElementUI from 'element-ui'
 import moment from 'vue-moment'
-import './assets/styles/index.css'
 
 // Load interne component
 import App from './App'
 import router from './router'
 import storeModule from './store'
+import './assets/styles/index.css'
+import './assets/material/material-icons.css'
 
 // Setup Vue instance
 Vue.use(Vuex)

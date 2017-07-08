@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --require babel-core/register -s 1"
+  },
+  "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-eslint": "^7.1.1",
+    "babel-register": "^6.18.0",
+    "chai": "^3.5.0",
+    "eslint": "^3.13.1",
+    "mocha": "^3.2.0",
+    "superagent": "^3.3.2"
+  },
+  "dependencies": {
+    "md5": "^2.2.1"
+  }
+}

@@ -32,7 +32,7 @@ export default {
 
 <style>
 .quizz_wrapper {
-  margin: 40px 30px 0;
+  margin: 20px 30px 0;
 }
 
 .quizz-btn_wrapper {
@@ -44,8 +44,8 @@ export default {
   padding:0 50px;
   font-size: 3.4rem;
   text-align:left;
-  max-width:80%;
   min-height: 140px;
+  margin: 20px 0;
 }
 
 

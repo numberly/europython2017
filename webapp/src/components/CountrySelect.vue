@@ -290,7 +290,6 @@ export default {
     },
     handleSelect (item) {
       this.user.country = item.value
-      console.log(item)
     }
   },
   mounted () {
