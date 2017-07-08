@@ -5,7 +5,7 @@
       <div class="register-content_inner">
         <div class="register-card">
           <h3 style="">
-          {{greeting}}! <span style="margin-left:5px">Welcome</span>
+          {{greeting}}! <span style="margin-left:5px">Welcome Back</span>
           </h3>
           <div style="color:#999;text-align:center;margin-bottom:30px">
             Enter your detail below
@@ -37,20 +37,16 @@
               :model="user">
               <el-form-item>
                 <el-input
-                  v-model="user.firstName"
-                  placeholder="First name..."
-                  >
-                </el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-input
-                  v-model="user.lastName"
-                  placeholder="Last name..."
+                  v-model="user.name"
+                  placeholder="Name..."
                   >
                 </el-input>
               </el-form-item>
               <el-form-item>
                 <countrySelect :user="user"></countrySelect>
+              </el-form-item>
+              <el-form-item>
+                <el-checkbox v-model="user.cool">I'm cool !</el-checkbox>
               </el-form-item>
               <el-button
                 type="primary"
@@ -110,8 +106,7 @@ export default {
       })
     },
     register: function () {
-      if (this.user.firstName.length < 1 ||
-        this.user.lastName.length < 1 ||
+      if (this.user.name.length < 1 ||
         this.user.country.length < 1) {
         this.$message.error('Please complete all form.')
         return
@@ -131,9 +126,9 @@ export default {
       error: null,
       user: {
         email: '',
-        region: '',
-        firstName: '',
-        lastName: ''
+        country: '',
+        name: '',
+        cool: false
       }
     }
   }

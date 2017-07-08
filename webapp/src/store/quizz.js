@@ -14,7 +14,6 @@ const moduleQuizz = {
       state.quizzPending = true
     },
     [QUIZZ_SUCCESS] (state, quizz) {
-      console.log('Quizz in mutation: ', quizz)
       state.quizzPending = false
       for (var i = 0; i < quizz.length; i++) {
         state.quizz.push(quizz[i])
@@ -31,7 +30,6 @@ const moduleQuizz = {
       return Vue.http.get(url)
         .then(response => response.json())
         .then(json => {
-          console.log('Quizz response: ', json)
           commit(QUIZZ_SUCCESS, json)
           return json
         }).catch(() => {

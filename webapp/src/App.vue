@@ -32,6 +32,8 @@ body {
   background-image: url('assets/img/bgslide-1.svg');
   background-size: cover;
   background-position: 50%;
+  background: -webkit-linear-gradient(to right, #7b4397, #dc2430);
+  background: linear-gradient(to right, #7b4397, #dc2430);
 }
 
 h1,h2,h3,h4,h5,h6 {
