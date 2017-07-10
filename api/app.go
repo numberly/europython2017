@@ -150,7 +150,7 @@ func (a *App) getTopScores(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) getQuestions(w http.ResponseWriter, r *http.Request) {
-	cursor, err := rethink.Table("questions").Run(a.RethinkSession)
+	cursor, err := rethink.Table("questions").OrderBy(rethink.Desc("id")).Run(a.RethinkSession)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
