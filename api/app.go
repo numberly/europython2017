@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -136,9 +137,16 @@ func (a *App) getUser(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) getTopScores(w http.ResponseWriter, r *http.Request) {
 	// fishy way, no date validatioon
-	date := r.URL.Query().Get("date")
+	//date := r.URL.Query().Get("date")
 
-	cursor, err := rethink.Table("users").Filter(func(row rethink.Term) rethink.Term { return row.Field("scores").Field(date) }).OrderBy(rethink.Desc(func(row rethink.Term) rethink.Term { return row.Field("scores").Field(date) })).Run(a.RethinkSession)
+	//	cursor, err := rethink.Table("users").Filter(func(row rethink.Term) rethink.Term { return row.Field("scores").Field(date) }).OrderBy(rethink.Desc(func(row rethink.Term) rethink.Term { return row.Field("scores").Field(date) })).Run(a.RethinkSession)
+
+	cursor, err := rethink.RawQuery([]byte(`[71,[[41,[[44,[[44,[[35,[[32,[[15,[[14,["ep17"]],"users"]],{"scores":{"2017-07-10":true}}]],[69,[[2,[16]],{"dt":[170,[[170,[[13,[]],"scores"]],"2017-07-10"]]}]]]],[35,[[32,[[15,[[14,["ep17"]],"users"]],{"scores":{"2017-07-11":true}}]],[69,[[2,[17]],{"dt":[170,[[170,[[10,[17]],"scores"]],"2017-07-11"]]}]]]]]],[35,[[32,[[15,[[14,["ep17"]],"users"]],{"scores":{"2017-07-12":true}}]],[69,[[2,[18]],{"dt":[170,[[170,[[10,[18]],"scores"]],"2017-07-12"]]}]]]]]],[74,["dt"]]]],10]]`)).Run(a.RethinkSession)
+
+	if err != nil {
+		fmt.Printf("ERROR %v", err)
+		return
+	}
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
