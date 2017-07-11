@@ -67,6 +67,7 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/api/users", a.createUser).Methods("POST")
 
 	a.Router.HandleFunc("/api/users/{id}", a.getUser).Methods("GET")
+
 	a.Router.HandleFunc("/api/questions", a.getQuestions).Methods("GET")
 	a.Router.HandleFunc("/api/questions/{id}", a.validateQuestion).Methods("POST")
 
@@ -75,8 +76,9 @@ func (a *App) InitializeRoutes() {
 
 func (a *App) Run(addr string) {
 	origins := handlers.AllowedOrigins([]string{"*"})
-	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "content-type"})
+	headers := handlers.AllowedHeaders([]string{"*"})
 	methods := handlers.AllowedMethods([]string{"GET", "DELETE", "HEAD", "POST", "PUT", "OPTIONS"})
+
 	log.Fatal(http.ListenAndServe(":8888", handlers.CORS(headers, origins, methods)(a.Router)))
 }
 
@@ -136,15 +138,25 @@ func (a *App) getTopScores(w http.ResponseWriter, r *http.Request) {
 	// fishy way, no date validatioon
 	date := r.URL.Query().Get("date")
 
-	cursor, err := rethink.Table("users").Filter(func(row rethink.Term) rethink.Term { return row.Field("scores").Field(date) }).OrderBy(rethink.Desc(func(row rethink.Term) rethink.Term { return row.Field("scores").Field(date) })).Run(a.RethinkSession)
+	if date != "" {
+		cursor, err := rethink.Table("users").Filter(func(row rethink.Term) rethink.Term { return row.Field("scores").Field(date) }).OrderBy(rethink.Desc(func(row rethink.Term) rethink.Term { return row.Field("scores").Field(date) })).Run(a.RethinkSession)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		scores, err := getTopScores(cursor)
 
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+		respondWithJSON(w, http.StatusOK, scores)
+	} else {
+		cursor, err := rethink.RawQuery([]byte(`[41,[[72,[[50,[[15,[[14,["ep17"]],"scores"]],"id_user",[15,[[14,["ep17"]],"users"]]]]]],[74,["total_score"]]]]`)).Run(a.RethinkSession)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		scores, err := getTopScores(cursor)
+
+		respondWithJSON(w, http.StatusOK, scores)
 	}
-	scores, err := getTopScores(cursor)
-
-	respondWithJSON(w, http.StatusOK, scores)
 }
 
 func (a *App) getQuestions(w http.ResponseWriter, r *http.Request) {
