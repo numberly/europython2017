@@ -8,13 +8,17 @@ import (
 )
 
 type User struct {
-	ID         string         `json:"id" gorethink:"id"`
-	Cool       bool           `json:"cool" gorethink:"cool"`
-	Email      string         `json:"email" gorethink:"email"`
-	Name       string         `json:"name" gorethink:"name"`
-	Country    string         `json:"country" gorethink:"country"`
-	TotalScore string         `json:"total_score" gorethink:"total_score"`
-	Scores     map[string]int `json:"scores" gorethink:"scores"`
+	ID      string         `json:"id" gorethink:"id"`
+	Cool    bool           `json:"cool" gorethink:"cool"`
+	Email   string         `json:"email" gorethink:"email"`
+	Name    string         `json:"name" gorethink:"name"`
+	Country string         `json:"country" gorethink:"country"`
+	Scores  map[string]int `json:"scores" gorethink:"scores"`
+}
+
+type UserResponse struct {
+	User
+	TotalScore string `json:"total_score" gorethink:"total_score"`
 }
 
 func (u *User) getUser(session *rethink.Session) error {
@@ -152,8 +156,8 @@ type Score struct {
 	TotalScore int    `json:"total_score" gorethink:"total_score"`
 }
 
-func getTopScores(cursor *rethink.Cursor) ([]User, error) {
-	users := []User{}
+func getTopScores(cursor *rethink.Cursor) ([]UserResponse, error) {
+	users := []UserResponse{}
 	err := cursor.All(&users)
 	if err != nil {
 		return users, err
