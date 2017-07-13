@@ -72,6 +72,8 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/api/questions/{id}", a.validateQuestion).Methods("POST")
 
 	a.Router.HandleFunc("/api/scores", a.getTopScores).Methods("GET")
+
+	a.Router.HandleFunc("/api/stats/country", a.getCountryStats).Methods("GET")
 }
 
 func (a *App) Run(addr string) {
@@ -157,6 +159,17 @@ func (a *App) getTopScores(w http.ResponseWriter, r *http.Request) {
 
 		respondWithJSON(w, http.StatusOK, scores)
 	}
+}
+
+func (a *App) getCountryStats(w http.ResponseWriter, r *http.Request) {
+	cursor, err := rethink.RawQuery([]byte(`[43,[[144,[[15,[[14,["ep17"]],"users"]],"country"]]]]`)).Run(a.RethinkSession)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	stats, err := getCountryStats(cursor)
+
+	respondWithJSON(w, http.StatusOK, stats)
 }
 
 func (a *App) getQuestions(w http.ResponseWriter, r *http.Request) {
