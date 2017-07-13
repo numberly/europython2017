@@ -11,6 +11,14 @@ import (
 	rethink "gopkg.in/gorethink/gorethink.v3"
 )
 
+// Version TODO
+// Build TODO
+var (
+	Version string
+	Build   string
+	Hash    string
+)
+
 type App struct {
 	Router         *mux.Router
 	RethinkSession *rethink.Session
