@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	rethink "gopkg.in/gorethink/gorethink.v3"
 )
 
+// Score TODO
 type Score struct {
 	Date       string `json:"date" gorethink:"date"`
 	ID         string `json:"id" gorethink:"id"`
@@ -13,7 +14,8 @@ type Score struct {
 	TotalScore int    `json:"total_score" gorethink:"total_score"`
 }
 
-func getTopScores(cursor *rethink.Cursor) ([]UserResponse, error) {
+// GetTopScores return top score user
+func GetTopScores(cursor *rethink.Cursor) ([]UserResponse, error) {
 	users := []UserResponse{}
 	err := cursor.All(&users)
 	if err != nil {

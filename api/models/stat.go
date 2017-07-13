@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"fmt"
@@ -6,12 +6,14 @@ import (
 	rethink "gopkg.in/gorethink/gorethink.v3"
 )
 
+// CountryStat TODO
 type CountryStat struct {
 	Country string `json:"country" gorethink:"group"`
 	Count   int    `json:"count" gorethink:"reduction"`
 }
 
-func getCountryStats(cursor *rethink.Cursor) ([]CountryStat, error) {
+// GetCountryStats return user count grouped by country
+func GetCountryStats(cursor *rethink.Cursor) ([]CountryStat, error) {
 	stats := []CountryStat{}
 	err := cursor.All(&stats)
 	if err != nil {

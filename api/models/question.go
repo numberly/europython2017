@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	rethink "gopkg.in/gorethink/gorethink.v3"
 )
 
+// Question TODO
 type Question struct {
 	Index   int      `json:"index" gorethink:"index"` // AnswerIndex
 	Answers []string `json:"answers" gorethink:"answers"`
@@ -13,12 +14,14 @@ type Question struct {
 	Text    string   `json:"text" gorethink:"text"`
 }
 
-type validateQuestion struct {
+// ValidateQuestion return the quetion
+type ValidateQuestion struct {
 	Answer int    `json:"answer"`
 	UserID string `json:"user_id"`
 }
 
-func (q *Question) getQuestion(session *rethink.Session) error {
+// GetQuestion return a defined auestion
+func (q *Question) GetQuestion(session *rethink.Session) error {
 	res, err := rethink.Table("questions").Get(q.ID).Run(session)
 	if err != nil {
 		return err
@@ -32,7 +35,8 @@ func (q *Question) getQuestion(session *rethink.Session) error {
 	return nil
 }
 
-func getQuestions(cursor *rethink.Cursor) ([]Question, error) {
+// GetQuestions return all questions
+func GetQuestions(cursor *rethink.Cursor) ([]Question, error) {
 	questions := []Question{}
 	err := cursor.All(&questions)
 	if err != nil {

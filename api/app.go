@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	rethink "gopkg.in/gorethink/gorethink.v3"
+
+	models "ep17_quizz/api/models"
 )
 
 // Version TODO
@@ -19,6 +21,7 @@ var (
 	Hash    string
 )
 
+// App contain Router
 type App struct {
 	Router         *mux.Router
 	RethinkSession *rethink.Session
@@ -36,6 +39,7 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Write(response)
 }
 
+// Initialize setup
 func (a *App) Initialize(address, username, password, database string) {
 	var err error
 
@@ -53,6 +57,7 @@ func (a *App) Initialize(address, username, password, database string) {
 	a.InitializeDb(a.RethinkSession, database)
 }
 
+// InitializeDb setup DB
 func (a *App) InitializeDb(session *rethink.Session, database string) {
 	_, err := rethink.DBCreate(database).RunWrite(session)
 	if err != nil {
@@ -70,6 +75,7 @@ func (a *App) InitializeDb(session *rethink.Session, database string) {
 	}
 }
 
+// InitializeRoutes initiliaze all route
 func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/api/users", a.getUsers).Methods("GET", "OPTIONS")
 	a.Router.HandleFunc("/api/users", a.createUser).Methods("POST")
@@ -84,6 +90,7 @@ func (a *App) InitializeRoutes() {
 	a.Router.HandleFunc("/api/stats/country", a.getCountryStats).Methods("GET")
 }
 
+// Run activate the server
 func (a *App) Run(addr string) {
 	origins := handlers.AllowedOrigins([]string{"*"})
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Accept", "Accept-Language", "Content-Language", "Origin", "Cache-Control", "Expires"})
@@ -98,14 +105,14 @@ func (a *App) getUsers(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	users, err := getUsers(cursor)
+	users, err := models.GetUsers(cursor)
 
 	respondWithJSON(w, http.StatusOK, users)
 }
 
 func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
 	// TODO: test the receives values
-	var u User
+	var u models.User
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&u); err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
@@ -120,7 +127,7 @@ func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 	u.ID = hash
 
-	if err := u.createUser(a.RethinkSession); err != nil {
+	if err := u.CreateUser(a.RethinkSession); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -130,8 +137,8 @@ func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) getUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	u := User{ID: vars["id"]}
-	if err := u.getUser(a.RethinkSession); err != nil {
+	u := models.User{ID: vars["id"]}
+	if err := u.GetUser(a.RethinkSession); err != nil {
 		switch err {
 		case rethink.ErrEmptyResult:
 			respondWithError(w, http.StatusNotFound, "User not found")
@@ -154,7 +161,7 @@ func (a *App) getTopScores(w http.ResponseWriter, r *http.Request) {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		scores, err := getTopScores(cursor)
+		scores, err := models.GetTopScores(cursor)
 
 		respondWithJSON(w, http.StatusOK, scores)
 	} else {
@@ -163,7 +170,7 @@ func (a *App) getTopScores(w http.ResponseWriter, r *http.Request) {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		scores, err := getTopScores(cursor)
+		scores, err := models.GetTopScores(cursor)
 
 		respondWithJSON(w, http.StatusOK, scores)
 	}
@@ -175,7 +182,7 @@ func (a *App) getCountryStats(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	stats, err := getCountryStats(cursor)
+	stats, err := models.GetCountryStats(cursor)
 
 	respondWithJSON(w, http.StatusOK, stats)
 }
@@ -186,13 +193,13 @@ func (a *App) getQuestions(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	questions, err := getQuestions(cursor)
+	questions, err := models.GetQuestions(cursor)
 
 	respondWithJSON(w, http.StatusOK, questions)
 }
 
 func (a *App) validateQuestion(w http.ResponseWriter, r *http.Request) {
-	var v validateQuestion
+	var v models.ValidateQuestion
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&v); err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
@@ -207,9 +214,9 @@ func (a *App) validateQuestion(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "invalid question id")
 		return
 	}
-	q := Question{ID: questionID}
+	q := models.Question{ID: questionID}
 
-	if err := q.getQuestion(a.RethinkSession); err != nil {
+	if err := q.GetQuestion(a.RethinkSession); err != nil {
 		switch err {
 		case rethink.ErrEmptyResult:
 			respondWithError(w, http.StatusNotFound, "Question not found")
@@ -220,8 +227,8 @@ func (a *App) validateQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// retrieve user
-	u := User{ID: v.UserID}
-	if err := u.getUser(a.RethinkSession); err != nil {
+	u := models.User{ID: v.UserID}
+	if err := u.GetUser(a.RethinkSession); err != nil {
 		switch err {
 		case rethink.ErrEmptyResult:
 			respondWithError(w, http.StatusNotFound, "User not found")
@@ -232,7 +239,7 @@ func (a *App) validateQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if q.Index == v.Answer {
-		u.hitScore(a.RethinkSession)
+		u.HitScore(a.RethinkSession)
 	}
 
 	respondWithJSON(w, http.StatusOK, u)

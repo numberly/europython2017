@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	rethink "gopkg.in/gorethink/gorethink.v3"
 )
 
+// User TODO
 type User struct {
 	ID      string         `json:"id" gorethink:"id"`
 	Cool    bool           `json:"cool" gorethink:"cool"`
@@ -16,12 +17,14 @@ type User struct {
 	Scores  map[string]int `json:"scores" gorethink:"scores"`
 }
 
+// UserResponse ..TODO
 type UserResponse struct {
 	User
 	TotalScore string `json:"total_score" gorethink:"total_score"`
 }
 
-func (u *User) getUser(session *rethink.Session) error {
+// GetUser return user for the given id
+func (u *User) GetUser(session *rethink.Session) error {
 	res, err := rethink.Table("users").Get(u.ID).Run(session)
 	if err != nil {
 		fmt.Printf("%v :: getUser :: unable to retrieve user :: %v \n", u.ID, err)
@@ -38,7 +41,8 @@ func (u *User) getUser(session *rethink.Session) error {
 	return nil
 }
 
-func (u *User) hitScore(session *rethink.Session) error {
+// HitScore return user score
+func (u *User) HitScore(session *rethink.Session) error {
 	currentTime := time.Now().Local()
 	currentDate := currentTime.Format("2006-01-02")
 	scoreID := fmt.Sprintf("%v_%v", u.ID, currentDate)
@@ -86,22 +90,24 @@ func (u *User) hitScore(session *rethink.Session) error {
 		return err
 	}
 
-	fmt.Printf("%v :: hitScore :: done %v \n", u.ID)
+	fmt.Printf("%v :: hitScore :: done\n", u.ID)
 	return nil
 }
 
-func (u *User) createUser(session *rethink.Session) error {
+// CreateUser return
+func (u *User) CreateUser(session *rethink.Session) error {
 	_, err := rethink.Table("users").Insert(u).RunWrite(session)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("%v :: createUser :: done %v \n", u.ID)
+	fmt.Printf("%v :: createUser :: done\n", u.ID)
 	return nil
 }
 
-func getUsers(cursor *rethink.Cursor) ([]User, error) {
+// GetUsers return all users in DB
+func GetUsers(cursor *rethink.Cursor) ([]User, error) {
 	users := []User{}
 	err := cursor.All(&users)
 	if err != nil {
