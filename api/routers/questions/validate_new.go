@@ -2,56 +2,66 @@ package questions
 
 import (
 	"encoding/json"
-	"ep17_quizz/api/models"
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
+	"github.com/unrolled/render"
+	rethink "gopkg.in/gorethink/gorethink.v3"
+
+	"ep17_quizz/api/databases"
+	"ep17_quizz/api/errors"
+	"ep17_quizz/api/models"
+	"ep17_quizz/api/utils"
 )
 
-func (a *App) validateQuestion(w http.ResponseWriter, r *http.Request) {
+func validateCreate(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	ctx := req.Context()
+	session := databases.RethinkFromContext(req.Context())
+	s := utils.LoggingFromContext(ctx)
+
 	var v models.ValidateQuestion
-	decoder := json.NewDecoder(r.Body)
+	decoder := json.NewDecoder(req.Body)
 	if err := decoder.Decode(&v); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		errors.WriteHTTP(rw, errors.ErrInternalError, s)
 		return
 	}
-	defer r.Body.Close()
+	defer req.Body.Close()
 
 	// retrieve question
-	vars := mux.Vars(r)
-	questionID, err := strconv.Atoi(vars["id"])
+	questionID, err := strconv.Atoi(ps.ByName("id"))
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "invalid question id")
+		errors.WriteHTTP(rw, errors.ErrInternalError, s)
 		return
 	}
 	q := models.Question{ID: questionID}
 
-	if err := q.GetQuestion(a.RethinkSession); err != nil {
+	if err := q.GetQuestion(session); err != nil {
 		switch err {
 		case rethink.ErrEmptyResult:
-			respondWithError(w, http.StatusNotFound, "Question not found")
+			errors.WriteHTTP(rw, errors.ErrNotFound, s)
 		default:
-			respondWithError(w, http.StatusInternalServerError, err.Error())
+			errors.WriteHTTP(rw, errors.ErrInternalError, s)
 		}
 		return
 	}
 
 	// retrieve user
 	u := models.User{ID: v.UserID}
-	if err := u.GetUser(a.RethinkSession); err != nil {
+	if err := u.GetUser(session); err != nil {
 		switch err {
 		case rethink.ErrEmptyResult:
-			respondWithError(w, http.StatusNotFound, "User not found")
+			errors.WriteHTTP(rw, errors.ErrNotFound, s)
 		default:
-			respondWithError(w, http.StatusInternalServerError, err.Error())
+			errors.WriteHTTP(rw, errors.ErrInternalError, s)
 		}
 		return
 	}
 
 	if q.Index == v.Answer {
-		u.HitScore(a.RethinkSession)
+		u.HitScore(session)
 	}
 
-	respondWithJSON(w, http.StatusOK, u)
+	rdr := render.New()
+	rdr.JSON(rw, http.StatusOK, u)
 }

@@ -8,7 +8,9 @@ import (
 
 // Basic regroup handlers : Panic, Mongo
 func Basic(h httprouter.Handle) httprouter.Handle {
-	return handlers.Panic(
-		handlers.Mongo(h),
+	return handlers.Logging(
+		handlers.Panic(
+			handlers.Rethink(h),
+		),
 	)
 }

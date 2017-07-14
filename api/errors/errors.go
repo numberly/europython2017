@@ -2,6 +2,7 @@ package errors
 
 import (
 	"encoding/json"
+	"ep17_quizz/api/utils"
 	"net/http"
 )
 
@@ -46,8 +47,9 @@ var (
 )
 
 // WriteHTTP write the given error as an HTTP response
-func WriteHTTP(rw http.ResponseWriter, err *Error) {
+func WriteHTTP(rw http.ResponseWriter, err *Error, l *utils.LoggingContext) {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(err.CodeHTTP)
+	l.StatusCode = err.CodeHTTP
 	json.NewEncoder(rw).Encode(Errors{[]*Error{err}})
 }

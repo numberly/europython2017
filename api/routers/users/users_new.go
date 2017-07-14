@@ -2,31 +2,43 @@ package users
 
 import (
 	"encoding/json"
-	"ep17_quizz/api/models"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
+	"github.com/unrolled/render"
+
+	"ep17_quizz/api/databases"
+	"ep17_quizz/api/errors"
+	"ep17_quizz/api/models"
+	"ep17_quizz/api/utils"
 )
 
-func userCreate(w http.ResponseWriter, r *http.Request) {
+func usersCreate(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	ctx := req.Context()
+	s := utils.LoggingFromContext(ctx)
+	session := databases.RethinkFromContext(req.Context())
+
 	// TODO: test the receives values
 	var u models.User
-	decoder := json.NewDecoder(r.Body)
+	decoder := json.NewDecoder(req.Body)
 	if err := decoder.Decode(&u); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		errors.WriteHTTP(rw, errors.ErrBadRequest, s)
 		return
 	}
-	defer r.Body.Close()
+	defer req.Body.Close()
 
-	hash, err := MD5FromString(u.Email)
+	hash, err := utils.MD5FromString(u.Email)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		errors.WriteHTTP(rw, errors.ErrBadRequest, s)
 		return
 	}
 	u.ID = hash
 
-	if err := u.CreateUser(a.RethinkSession); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+	if err := u.CreateUser(session); err != nil {
+		errors.WriteHTTP(rw, errors.ErrInternalError, s)
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, u)
+	rdr := render.New()
+	rdr.JSON(rw, http.StatusCreated, u)
 }

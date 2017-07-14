@@ -1,17 +1,36 @@
 package questions
 
 import (
-	"ep17_quizz/api/models"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
+	"github.com/unrolled/render"
+	rethink "gopkg.in/gorethink/gorethink.v3"
+
+	"ep17_quizz/api/databases"
+	"ep17_quizz/api/errors"
+	"ep17_quizz/api/models"
+	"ep17_quizz/api/utils"
 )
 
-func (a *App) getQuestions(w http.ResponseWriter, r *http.Request) {
-	cursor, err := rethink.Table("questions").OrderBy(rethink.Desc("id")).Run(a.RethinkSession)
+func questionsList(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	ctx := req.Context()
+	session := databases.RethinkFromContext(ctx)
+	s := utils.LoggingFromContext(ctx)
+
+	cursor, err := rethink.Table("questions").OrderBy(rethink.Desc("id")).Run(session)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		errors.WriteHTTP(rw, errors.ErrInternalError, s)
 		return
 	}
-	questions, err := models.GetQuestions(cursor)
 
-	respondWithJSON(w, http.StatusOK, questions)
+	questions, err := models.GetQuestions(cursor)
+	if err != nil {
+		errors.WriteHTTP(rw, errors.ErrInternalError, s)
+		return
+	}
+
+	s.StatusCode = http.StatusOK
+	rdr := render.New()
+	rdr.JSON(rw, http.StatusOK, questions)
 }

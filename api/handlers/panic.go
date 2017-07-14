@@ -8,6 +8,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	cErrors "ep17_quizz/api/errors"
+	"ep17_quizz/api/utils"
 )
 
 // Panic handler catch panic to return a consistent response
@@ -18,6 +19,7 @@ func Panic(next httprouter.Handle) httprouter.Handle {
 
 		var err error
 		defer func() {
+			s := utils.LoggingFromContext(r.Context())
 			r := recover()
 			if r != nil {
 				switch t := r.(type) {
@@ -29,7 +31,7 @@ func Panic(next httprouter.Handle) httprouter.Handle {
 					err = errors.New("Unknown error")
 				}
 				log.Errorf("Panic handler error : %v.", err)
-				cErrors.WriteHTTP(w, cErrors.ErrInternalError)
+				cErrors.WriteHTTP(w, cErrors.ErrInternalError, s)
 			}
 		}()
 		next(w, r, ps)
