@@ -1,17 +1,35 @@
 package users
 
 import (
-	"ep17_quizz/api/models"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
+	"github.com/unrolled/render"
+	rethink "gopkg.in/gorethink/gorethink.v3"
+
+	"ep17_quizz/api/databases"
+	"ep17_quizz/api/errors"
+	"ep17_quizz/api/models"
+	"ep17_quizz/api/utils"
 )
 
-func usersList(w http.ResponseWriter, r *http.Request) {
-	cursor, err := rethink.Table("users").Run(a.RethinkSession)
+func usersList(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	ctx := req.Context()
+	s := utils.LoggingFromContext(ctx)
+	session := databases.RethinkFromContext(req.Context())
+
+	cursor, err := rethink.Table("users").Run(session)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		errors.WriteHTTP(rw, errors.ErrInternalError, s)
 		return
 	}
-	users, err := models.GetUsers(cursor)
 
-	respondWithJSON(w, http.StatusOK, users)
+	users, err := models.GetUsers(cursor)
+	if err != nil {
+		errors.WriteHTTP(rw, errors.ErrInternalError, s)
+		return
+	}
+
+	rdr := render.New()
+	rdr.JSON(rw, http.StatusOK, users)
 }

@@ -1,4 +1,4 @@
-BINARY=ep17-quizz-api
+BINARY=ep17-quiz-api
 
 VERSION=`git describe --abbrev=0 --tags`
 BUILD=`date +%FT%T%z`

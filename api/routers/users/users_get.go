@@ -1,24 +1,34 @@
 package users
 
 import (
-	"ep17_quizz/api/models"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
+	"github.com/unrolled/render"
+	rethink "gopkg.in/gorethink/gorethink.v3"
+
+	"ep17_quizz/api/databases"
+	"ep17_quizz/api/errors"
+	"ep17_quizz/api/models"
+	"ep17_quizz/api/utils"
 )
 
-func userRetrieve(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	u := models.User{ID: vars["id"]}
-	if err := u.GetUser(a.RethinkSession); err != nil {
+func usersRetrieve(rw http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	ctx := req.Context()
+	s := utils.LoggingFromContext(ctx)
+	session := databases.RethinkFromContext(req.Context())
+
+	u := models.User{ID: ps.ByName("id")}
+	if err := u.GetUser(session); err != nil {
 		switch err {
 		case rethink.ErrEmptyResult:
-			respondWithError(w, http.StatusNotFound, "User not found")
+			errors.WriteHTTP(rw, errors.ErrNotFound, s)
 		default:
-			respondWithError(w, http.StatusInternalServerError, err.Error())
+			errors.WriteHTTP(rw, errors.ErrInternalError, s)
 		}
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, u)
+	rdr := render.New()
+	rdr.JSON(rw, http.StatusOK, u)
 }
