@@ -1,4 +1,4 @@
-# ep17-quizz
+# ep17-quiz
 
 > Europython 2017 game by Numberly
 

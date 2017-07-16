@@ -9,7 +9,7 @@
 export default {
   name: 'app',
   beforeCreate () {
-    this.$store.dispatch('getQuizz')
+    this.$store.dispatch('getQuiz')
   }
 }
 </script>
@@ -53,5 +53,22 @@ h1,h2,h3,h4,h5,h6 {
 }*/
 .el-autocomplete-suggestion li {
   color: #444;
+}
+
+/* DIRTY */
+
+@media all and (orientation:portrait) {
+  .el-form-item__label {
+    font-size: 18px;
+  }
+  .el-form-item__content {
+    font-size: 16px;
+  }
+  .el-input {
+    font-size: 18px;
+  }
+  .el-button {
+    font-size: 18px;
+  }
 }
 </style>

@@ -3,8 +3,8 @@
     <!-- PART 1 : COUNTER -->
     <Counter :counter="counter" v-show="counter.value" v-if="!over"></Counter>
     <!-- PART 2 : QUIZZ  -->
-    <div class="quizz_container" v-if="!over && quizz.length > 0 && timeout > 0">
-      <div class="quizz_timer" v-show="!counter.value">
+    <div class="quiz_container" v-if="!over && quiz.length > 0 && timeout > 0">
+      <div class="quiz_timer" v-show="!counter.value">
         <div style="float:right;font-size:14px;width:60px;text-align:right;color:white">
           {{Math.ceil(timeout)}}s
           <i class="material-icons" style="vertical-align:middle;font-size:18px">&#xE425;</i>
@@ -17,12 +17,12 @@
         </el-progress>
       </div>
 
-      <div class="quizz" v-bind:class="{active: !counter.value}">
-        <Quizz
+      <div class="quiz" v-bind:class="{active: !counter.value}">
+        <Quiz
           :callback="nextQuestion"
-          :question="quizz[idQuestion].text"
-          :answers="quizz[idQuestion].answers">
-        </Quizz>
+          :question="quiz[idQuestion].text"
+          :answers="quiz[idQuestion].answers">
+        </Quiz>
       </div>
       <Distractor :counter="idQuestion"></Distractor>
     </div>
@@ -36,7 +36,7 @@
 import moment from 'moment'
 
 import Counter from './Counter'
-import Quizz from './Quizz'
+import Quiz from './Quiz'
 import Over from './Over'
 import Distractor from '@/components/Distractor'
 import config from '@/config'
@@ -45,7 +45,7 @@ export default {
   name: 'game',
   components: {
     Counter,
-    Quizz,
+    Quiz,
     Over,
     Distractor
   },
@@ -61,23 +61,25 @@ export default {
       counter: {value: true},
       over: false,
       idQuestion: 0,
-      quizz: this.$store.getters.getQuizz
+      quiz: this.$store.getters.getQuiz
     }
   },
   methods: {
     sendAnswer (answer) {
       this.$store.dispatch('sendAnswer', {
-        question: this.quizz[this.idQuestion],
+        question: this.quiz[this.idQuestion],
         userId: this.$store.getters.getUser.id,
         answer: answer
       })
     },
     nextQuestion (answer) {
       this.sendAnswer(answer)
-      if (this.idQuestion < this.quizz.length - 1) {
+      if (this.idQuestion < this.quiz.length - 1) {
         this.idQuestion += 1
         this.timeout += config.RESPONSE_BONUS
-        this.maxTimeout = this.timeout
+        if (this.timeout > this.maxTimeout) {
+          this.timeout = this.maxTimeout
+        }
       } else {
         this.over = true
       }
@@ -120,12 +122,12 @@ export default {
 </script>
 
 <style scoped>
-.quizz_timer {
+.quiz_timer {
   border-radius: 0 0 5px 5px;
   height:20px;
   padding: 15px 20px;
 }
-.quizz {
+.quiz {
   opacity: 0;
   max-width: 920px;
   margin: 0 auto;
@@ -133,10 +135,10 @@ export default {
   transition: all 0.3s ease-out;
   padding-bottom: 20px;
 }
-.quizz.active {
+.quiz.active {
   opacity: 1;
 }
-.quizz_container {
+.quiz_container {
   padding: 0 30px;
 }
 </style>

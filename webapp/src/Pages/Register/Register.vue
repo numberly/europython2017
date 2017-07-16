@@ -17,8 +17,11 @@
               label-position="top"
               label-width="100px"
               :model="user">
-              <el-form-item label="Email">
+              <el-form-item label="Email*">
                 <el-input v-model="user.email" type="email" min="3"></el-input>
+                <span style="color:#999">
+                  *We will not use your email for anything not related to this game.
+                </span>
               </el-form-item>
               <el-button
                 type="primary"
@@ -36,6 +39,9 @@
               style="text-align:left"
               :model="user">
               <el-form-item>
+                <el-checkbox v-model="user.cool">I'm cool !</el-checkbox>
+              </el-form-item>
+              <el-form-item>
                 <el-input
                   v-model="user.name"
                   placeholder="Name..."
@@ -44,9 +50,6 @@
               </el-form-item>
               <el-form-item>
                 <countrySelect :user="user"></countrySelect>
-              </el-form-item>
-              <el-form-item>
-                <el-checkbox v-model="user.cool">I'm cool !</el-checkbox>
               </el-form-item>
               <el-button
                 type="primary"
@@ -81,7 +84,7 @@ export default {
       if (hours >= 5 && hours < 13) {
         return 'Good morning'
       } else if (hours >= 13 && hours < 18) {
-        return 'Good afternon'
+        return 'Good afternoon'
       } else {
         return 'Good evening'
       }
@@ -161,7 +164,12 @@ export default {
   text-align:center;
   font-weight: 600;
   color: #555;
-  font-size: 24px;
+  font-size: 32px;
+}
+@media all and (orientation:landscape) {
+  .register-card h3 {
+    font-size: 28px;
+  }
 }
 
 .register-card > .el-card__body {
@@ -173,10 +181,14 @@ export default {
   justify-content: center;
   flex-direction: column;
   width: 50%;
-  max-width: 800px;
-  min-width: 700px;
+  min-width: 850px;
   height: 100%;
   background-color: #fefefe;
+}
+@media all and (orientation:landscape) {
+  .register-wrapper {
+    min-width: 700px;
+  }
 }
 
 .register-title {

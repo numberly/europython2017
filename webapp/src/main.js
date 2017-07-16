@@ -9,6 +9,7 @@ import VueResource from 'vue-resource'
 // Load extern library
 import ElementUI from 'element-ui'
 import moment from 'vue-moment'
+import FlagIcon from 'vue-flag-icon'
 
 // Load interne component
 import App from './App'
@@ -22,8 +23,12 @@ Vue.use(Vuex)
 Vue.use(VueResource)
 Vue.use(ElementUI)
 Vue.use(moment)
+Vue.use(FlagIcon)
 
+// Setup
 Vue.config.productionTip = false
+Vue.http.headers.common['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+Vue.http.headers.common.Expires = '0'
 
 // Store
 const store = new Vuex.Store({

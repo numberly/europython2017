@@ -58,9 +58,6 @@ export default {
     }
   },
   methods: {
-    bestScore: function () {
-
-    },
     todayScore () {
       if (this.user.scores) {
         return this.user.scores[this.currentDate]
