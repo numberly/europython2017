@@ -5,19 +5,26 @@
         <ScoreCard title="Global Top"></ScoreCard>
       </el-col>
       <el-col :span="12" :xs="24">
-        <ScoreCard title="Today's Top"></ScoreCard>
+        <ScoreCard title="Today's Top" :datetime="currentDate()"></ScoreCard>
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script>
+import moment from 'moment'
+
 import ScoreCard from '@/components/ScoreCard'
 
 export default {
   name: 'stats',
   components: {
     ScoreCard
+  },
+  methods: {
+    currentDate () {
+      return moment().format('YYYY-MM-DD')
+    }
   }
 }
 </script>

@@ -4,25 +4,86 @@
       {{title}}
     </h2>
     <div>
-      <div v-for="user in users" class="card-user">
-        <span class="card-user_name">
-          {{user.name}}
-        </span>
-        <span class="card-user_score">
-          {{getScore(user)}}
-          <i class="material-icons">&#xE885;</i>
-        </span>
-      </div>
+      <UserScore
+        v-for="user in users"
+        v-bind:key="user.id"
+        v-bind:datetime="datetime"
+        v-bind:user="user">
+      </UserScore>
     </div>
   </div>
 </template>
 
 <script>
+import Vue from 'vue'
+import config from '@/config'
+
+import UserScore from './UserScore'
+
 export default {
   name: 'score-card',
-  date () {
+  components: {
+    UserScore
+  },
+  data () {
     return {
       users: []
+      // users: [
+      //   {
+      //     'id': '1def3263216ea165f7caaf69ebe9f4ff',
+      //     'cool': true,
+      //     'email': 'emre.yilmaz@metglobal.com',
+      //     'name': 'Yunus emre yilmaz',
+      //     'country': 'Turkey',
+      //     'scores': {
+      //       '2017-07-10': 4,
+      //       '2017-07-11': 11,
+      //       '2017-07-12': 23,
+      //       '2017-07-13': 35
+      //     },
+      //     'total_score': ''
+      //   },
+      //   {
+      //     'id': 'b7883a985f3d04cd64837abdf8a9cd02',
+      //     'cool': false,
+      //     'email': 'dincelumit@gmail.com',
+      //     'name': 'Umit',
+      //     'country': 'Turkey',
+      //     'scores': {
+      //       '2017-07-10': 8,
+      //       '2017-07-11': 7,
+      //       '2017-07-12': 10,
+      //       '2017-07-13': 30
+      //     },
+      //     'total_score': ''
+      //   },
+      //   {
+      //     'id': 'a4521b2b186593d74e27ff6e23eb2696',
+      //     'cool': true,
+      //     'email': 'krother@academis.eu',
+      //     'name': 'Kristian',
+      //     'country': 'Germany',
+      //     'scores': {
+      //       '2017-07-12': 1,
+      //       '2017-07-13': 26
+      //     },
+      //     'total_score': ''
+      //   },
+      //   {
+      //     'id': 'cd2341319944fff2b7c29527b5d98187',
+      //     'cool': false,
+      //     'email': 'moreno.mazzocchetti@gmail.com',
+      //     'name': 'Moreno',
+      //     'country': 'Italy',
+      //     'scores': {
+      //       '2017-07-11': 2,
+      //       '2017-07-12': 10,
+      //       '2017-07-13': 21
+      //     },
+      //     'total_score': ''
+      //   }
+      // ]
+      //
     }
   },
   props: {
@@ -30,69 +91,27 @@ export default {
     datetime: String
   },
   methods: {
-    getScore (user) {
-      // Specific date
-      if (this.datetime && this.datetime.length > 0) {
-        return user[this.datetime]
+    fetchStats () {
+      let url = config.API_URL + '/scores'
+      if (this.datetime) {
+        url += '?date=' + this.datetime
       }
-
-      // find biggest score
-      return 1111
+      Vue.http.get(url)
+        .then(response => response.json())
+        .then(json => {
+          this.users = json
+        })
+    },
+    cancelAutoUpdate () {
+      clearInterval(this.timer)
     }
   },
-  beforeCreate () {
-    this.users = [
-      {
-        'id': '98948b56841bc5ded022c5c1f9288da2',
-        'cool': false,
-        'email': 'clovss.mna@gmail.com',
-        'name': 'JC',
-        'country': 'France',
-        'scores': {
-          '2017-07-08': 90
-        }
-      },
-      {
-        'id': '98948b56841bc5ded022c5c1f9288da3',
-        'cool': false,
-        'email': 'clovss.mna@gmail.com',
-        'name': 'Paul',
-        'country': 'France',
-        'scores': {
-          '2017-07-08': 35
-        }
-      },
-      {
-        'id': '98948b56841bc5ded022c5c1f9288da4',
-        'cool': false,
-        'email': 'clovss.mna@gmail.com',
-        'name': 'Clovis',
-        'country': 'France',
-        'scores': {
-          '2017-07-08': 22
-        }
-      },
-      {
-        'id': '98948b56841bc5ded022c5c1f9288da5',
-        'cool': false,
-        'email': 'clovss.mna@gmail.com',
-        'name': 'Remi',
-        'country': 'France',
-        'scores': {
-          '2017-07-08': 13
-        }
-      },
-      {
-        'id': '98948b56841bc5ded022c5c1f9288da6',
-        'cool': false,
-        'email': 'clovss.mna@gmail.com',
-        'name': 'Geoffrey',
-        'country': 'France',
-        'scores': {
-          '2017-07-08': 4
-        }
-      }
-    ]
+  beforeDestroy () {
+    this.cancelAutoUpdate()
+  },
+  created () {
+    this.fetchStats()
+    this.timer = setInterval(this.fetchStats, 1000)
   }
 }
 </script>
@@ -112,7 +131,7 @@ export default {
   .card .card-user {
     position: relative;
     text-align: left;
-    padding: 20px 30px 20px 40px;
+    padding: 20px 40px 20px 20px;
     background-color: rgba(255,255,255,0.95);
     border-radius: 3px;
     margin: 15px 0;
@@ -132,8 +151,8 @@ export default {
     font-size: 18px;
     display: none;
     position: absolute;
-    top: 20px;
-    left: 15px;
+    top: 18px;
+    right: 15px;
   }
 
   .card-user:nth-child(1) .card-user_score i.material-icons,

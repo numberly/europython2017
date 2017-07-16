@@ -1,7 +1,7 @@
 import moduleRegister from './register'
-import moduleQuizz from './quizz'
+import moduleQuiz from './quiz'
 
 export default {
   register: moduleRegister,
-  quizz: moduleQuizz
+  quiz: moduleQuiz
 }
