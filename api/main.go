@@ -17,6 +17,7 @@ import (
 	"ep17_quizz/api/routers/scores"
 	"ep17_quizz/api/routers/stats"
 	"ep17_quizz/api/routers/users"
+	"ep17_quizz/api/routers/ws"
 )
 
 // Version TODO
@@ -33,6 +34,7 @@ func initRouter(router *httprouter.Router) {
 	users.NewRouter(router)
 	stats.NewRouter(router)
 	questions.NewRouter(router)
+	ws.NewRouter(router)
 }
 
 // Initialize setup
