@@ -21,3 +21,8 @@ export APP_DB_NAME=ep17
 # server
 go run *go
 ```
+
+# Run local instance rethinkdb via docker
+```
+$ docker run -p 29015:29015 -p 28015:28015 rethinkdb
+```
