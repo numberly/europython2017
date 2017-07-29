@@ -10,6 +10,7 @@ import VueResource from 'vue-resource'
 import ElementUI from 'element-ui'
 import moment from 'vue-moment'
 import FlagIcon from 'vue-flag-icon'
+import VueNativeSock from 'vue-native-websocket'
 
 // Load interne component
 import App from './App'
@@ -24,6 +25,7 @@ Vue.use(VueResource)
 Vue.use(ElementUI)
 Vue.use(moment)
 Vue.use(FlagIcon)
+Vue.use(VueNativeSock, 'ws://ep17.com/api/socket')
 
 // Setup
 Vue.config.productionTip = false

@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 const uuidv4 = require('uuid/v4');
 
-var ws = new WebSocket("ws://localhost:9999/api/socket?uuid=" + uuidv4());
+var ws = new WebSocket("ws://ep17.com/api/socket?uuid=" + uuidv4());
 console.log("init connection...")
 
 
