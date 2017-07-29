@@ -5,12 +5,9 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/net/websocket"
-)
 
-type Message struct {
-	Author  string `json:"author"`
-	Content string `json:"content"`
-}
+	"ep17_quizz/api/utils/sockets"
+)
 
 func websocketHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	s := websocket.Server{Handler: websocket.Handler(socket)}
@@ -20,7 +17,6 @@ func websocketHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 func socket(s *websocket.Conn) {
 	defer s.Close()
 
-	client := NewClient(s, "id...")
-	greet(client)
-	client.listen()
+	client := sockets.NewClient(s)
+	client.Listen()
 }

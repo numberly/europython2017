@@ -85,12 +85,12 @@ func main() {
 
 	// Setup the route from the api to the router
 	router := httprouter.New()
-	initRouter(router)
 	initDB(
 		os.Getenv("APP_DB_ADDRESS"),
 		os.Getenv("APP_DB_USERNAME"),
 		os.Getenv("APP_DB_PASSWORD"),
 		*dbName)
+	initRouter(router)
 
 	// Start the api
 	log.Infof("EP17-quiz is running at %s.", addr)
